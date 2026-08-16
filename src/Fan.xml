@@ -34,10 +34,22 @@
     share="../lib/OFM-FanControl/src/Fan.share.xml"
     template="../lib/OFM-FanControl/src/Fan.templ.xml"
     NumChannels="2"
-    KoSingleOffset="20"
     KoOffset="20"
     >
     <op:verify File="../lib/OFM-FanControl/library.json" ModuleVersion="%ReleaseApplicationVersion%" />
+  </op:define>
+
+  <!-- Logikmodul: fertiges OpenKNX-Modul, nur eingebunden.
+       ModuleType 10 ist kein Tippfehler: das Logikmodul legt seine Versionsinformation unter
+       dem Typ des BASE-Moduls ab, deshalb teilen sich beide den Wert. Der Producer prueft das
+       und meckert bei jedem anderen Wert.
+       KoOffset 280 laesst der Lueftersteuerung (KO 20..83) reichlich Abstand. -->
+  <op:define prefix="LOG" ModuleType="10"
+    share="../lib/OFM-LogicModule/src/Logikmodul.share.xml"
+    template="../lib/OFM-LogicModule/src/Logikmodul.templ.xml"
+    NumChannels="30"
+    KoOffset="280">
+    <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="4.4" />
   </op:define>
 
   <generate />

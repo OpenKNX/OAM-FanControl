@@ -10,3 +10,4 @@ lib/*
 *.code-workspace
 include/versions.h
 include/knxprod.h
+include/buildtime.h
