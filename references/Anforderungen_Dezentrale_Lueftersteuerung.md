@@ -1,15 +1,21 @@
-> # ⚠ VERALTET — nicht mehr der gültige Stand
+> # ⚠ Erstes Konzeptpapier — nicht mehr der gültige Stand
 >
-> Dieses Dokument beschreibt die **ursprünglichen Anforderungen** und wurde seit dem
-> 14.08.2026 nicht mehr nachgeführt. An mehreren Stellen widerspricht es der Umsetzung,
-> unter anderem bei M-6 (Freigabe-Persistenz), bei der Stellgrößen-Kennlinie, bei
-> `KNOTEN_ID`/`GRUPPEN_ID` und bei `DEAKTIVIERT`.
+> Dies war das **erste Konzeptpapier**, geschrieben aus der Sicht von Heizungsbauer,
+> Kältetechniker und Zimmerer — also von den Gewerken, die die Anlage später bauen und
+> betreiben, **ohne Kenntnis des KNX-Busses**. Das war Absicht: die Funktion sollte zuerst
+> aus der Anlage heraus beschrieben werden, nicht aus dem Bus heraus. Was der Bus daraus
+> macht, kam bewusst erst im zweiten Durchgang dazu.
+>
+> Entsprechend fehlen hier alle Bus-Themen (DPTs, Gruppenadress-Topologie, Sendebedingungen)
+> und einige Festlegungen widersprechen der Umsetzung — unter anderem bei M-6
+> (Freigabe-Persistenz), bei der Stellgrößen-Kennlinie, bei `KNOTEN_ID`/`GRUPPEN_ID` und bei
+> `DEAKTIVIERT`. Seit dem 14.08.2026 nicht mehr nachgeführt.
 >
 > **Der gültige Stand steht in `Funktionsbeschreibung.md`.**
-> Die Begründungen und die Liste der beschlossenen Änderungen stehen in
+> Die Übersetzung in die KNX-Welt samt Begründungen und beschlossenen Änderungen steht in
 > `Review_Anforderungen_KNX-Sicht.md`.
 >
-> Aufgehoben als Beleg dafür, was ursprünglich gefordert war.
+> Aufgehoben als Beleg dafür, was fachlich ursprünglich gefordert war.
 
 ---
 
