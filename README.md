@@ -17,6 +17,11 @@ Direction is never commanded directly. Each node derives its own airflow directi
 phase assignment and the master's tact, so half the group runs supply air while the other half
 runs exhaust air, and they swap on every cycle.
 
+![Group topology: one master and three slaves on shared group addresses, phase and counter-phase
+moving air in opposite directions](references/%C3%9Cbersicht.drawio.png)
+
+*Diagram in German. Source: [`references/Übersicht.drawio`](references/Übersicht.drawio).*
+
 ## Features
 
 - **Two channel types** — reversible (two airflow directions, tact) and non-reversible.
