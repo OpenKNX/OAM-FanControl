@@ -45,7 +45,8 @@ The same channel as **slave** receives all of that on the same group addresses:
 received tact and the channel's own phase assignment](references/IO-Uebersicht-Slave.drawio.png)
 
 *Diagrams in German. Source: [`references/IO-Uebersicht.drawio`](references/IO-Uebersicht.drawio).
-KO numbers are relative to the channel — channel 1 = KO 20…51, channel 2 = KO 52…83.*
+KO numbers are relative to the channel — channel 1 = KO 20…51, channel 2 = KO 52…83, up to
+channel 8 = KO 244…275.*
 
 ## Features
 
@@ -56,8 +57,12 @@ KO numbers are relative to the channel — channel 1 = KO 20…51, channel 2 = K
 - **Bipolar drive** for reversing fans: speed and direction on a single output. 0 % is full
   speed in direction A, the midpoint is standstill, 100 % is full speed in direction B. The
   midpoint is the safe state. Non-reversible fans are driven conventionally.
-- **Setpoint sources** — fixed value, external communication object, or an internal
-  P controller on CO₂ or relative humidity.
+- **Setpoint sources** — fixed value, external communication object, an internal P controller
+  on CO₂ or relative humidity, or a two-point controller with hysteresis.
+- **Dew point guard** (master only, optional) — compares the dew point inside and outside and
+  stops ventilation while the outside air is the more humid one, so airing does not carry
+  moisture in. Reports fault code 7 without raising the alarm bit, because that is intended
+  operation rather than a defect.
 - **Per-node scaling** — share factor plus minimum and maximum drive level per direction.
 - **Start pulse** to break static friction, and a dead time before every direction change.
 - **Boost ventilation** as a master function, with its own runtime and power level.

@@ -199,11 +199,13 @@ Das fehlte in den Anforderungen, weil es ohne Bus- und Hardwarekenntnis nicht si
 | **Sendebedingungen** | Totband in % **und** absoluter Sockelwert je Analogausgang, plus Mindest-Sendeabstand. Eine rein relative Schwelle versagt beim vorzeichenbehafteten Volumenstrom: am Nulldurchgang wird x % beliebig klein und der Knoten sendet dauerhaft. |
 | **Masterüberwachung** | `MASTER_LEBT` (Master-Ausgang / Slave-Eingang), Parameter Überwachungszeit und Sendeabstand. KNX kennt keinen Verbindungszustand — Erreichbarkeit ist nur über zyklisches Senden plus Timeout darstellbar. |
 | **Stellgröße Mittelstellung** | K-3 fordert eine bipolare Stellgröße, benennt den Mittelwert aber als Teil der gestrichenen Kennlinie. Jetzt ein eigener Parameter, nur beim reversiblen Kanal. |
-| **Fehlercode-Wertevorrat** | Enum 0–6 mit dokumentierter Priorität (siehe 4.1). |
+| **Fehlercode-Wertevorrat** | Enum 0–8 mit dokumentierter Priorität (siehe 4.1). |
 | **Kanalbeschreibung** | Freitext je Kanal, benennt den ETS-Reiter und die Objekte. |
 | **Zwei Hardwarevarianten** | Reg1 Fan-Addon-X2 und MrSpieb HW-FanControl, zur Compile-Zeit gewählt: PWM-Polarität und Anzahl der Ausgänge unterscheiden sich und gehören nicht in die ETS. |
 | **PWM-Frequenz** | 500–20000 Hz, Vorgabe 1000, geräteweit — auf dem RP2040 ist sie keine Eigenschaft des einzelnen Ausgangs. |
 | **Logikmodul** | 30 Kanäle, unverändert eingebunden. |
+| **Zweipunkt mit Hysterese** | Vierte Sollwertquelle, aus der Original-Firmware nachgeholt: schalten an zwei Schwellen statt proportional. Teilt Regelgröße und Istwert-Eingang mit dem P-Regler. |
+| **Taupunktwächter** | Master-Veto über allen Sollwertquellen: vergleicht den Taupunkt innen und außen und sperrt, wenn die Außenluft die feuchtere ist. Vier eigene Messwert-Objekte (KO 20–23), Hysterese über zwei Abstände, Überwachungszeit für die Messwerte und wählbares Verhalten, wenn sie fehlen. |
 
 ### 4.1 Fehlercode
 
@@ -220,7 +222,9 @@ unterdrückt — genau das Prinzip aus M-4. Nach Freigabe- oder Master-Timeout i
 | 3 | Konfigurations- bzw. Kennlinienfehler | 3 |
 | 4 | ungültiger Empfangswert | 4 |
 | 5 | keine Drehzahl trotz Ansteuerung | 5 |
-| 6 | Überwachung ausgesetzt (suspendiert) | 6 (niedrigste) |
+| 6 | Überwachung ausgesetzt (suspendiert) | 6 |
+| 7 | Taupunktwächter sperrt | 7 |
+| 8 | Taupunktwächter ohne Messwerte | 8 (niedrigste) |
 
 Wert 6 ist die konkrete Darstellung des von A-2 geforderten „nicht verfügbar". `Störung`
 bleibt dabei 0 — eine Suspendierung ist kein Fehler.
@@ -238,9 +242,9 @@ haben. Verbindlich ist die rechte Spalte, verifiziert gegen `include/knxprod.h`.
 
 | | Beschlossen | Umgesetzt |
 |---|---|---|
-| KOs je Kanal | 29er-Block, 23 belegt, Kanal 1 = KO 20–48 | **32er-Block, 22 belegt**, Kanal 1 = **KO 20–51** … Kanal 8 = **244–275** |
-| Freie KO-Nummern | 8, 9, 20–23 | **9, 20–26, 28, 29** (8 ist jetzt der Istwert-Eingang) |
-| Parameter je Kanal | 80 Byte, 52 belegt | 80 Byte, **62 belegt**, Rest Reserve |
+| KOs je Kanal | 29er-Block, 23 belegt, Kanal 1 = KO 20–48 | **32er-Block, 26 belegt**, Kanal 1 = **KO 20–51** … Kanal 8 = **244–275** |
+| Freie KO-Nummern | 8, 9, 20–23 | **9, 24, 25, 26, 28, 29** — 8 ist der Istwert, 20–23 gehören dem Taupunktwächter |
+| Parameter je Kanal | 80 Byte, 52 belegt | 80 Byte, **72 belegt**, 8 Byte Reserve |
 | Knoten je Gerät | 2 | **8 Kanäle in der ETS**, real so viele wie das Board Ausgänge hat |
 | Logikmodul | `KoOffset 280` | **`KoOffset 512`** — 8 Lüfterkanäle reichen bis KO 275 |
 
