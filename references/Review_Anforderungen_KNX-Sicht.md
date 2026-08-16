@@ -6,8 +6,7 @@
 
 Das Anforderungsdokument wurde aus Sicht der Gewerke geschrieben, ohne Kenntnis des KNX-Busses.
 Dieses Dokument ist die Gegenüberstellung: was davon unverändert übernommen wurde, was der Bus
-anders erzwungen hat, was gestrichen wurde, was fehlte — und welche Abweichungen **noch offen**
-sind.
+anders erzwungen hat, was gestrichen wurde und was fehlte.
 
 Die Kennungen `K-…`, `E-…`, `A-…`, `M-…`, `MA-…` verweisen auf Regeln im Anforderungsdokument.
 
@@ -17,7 +16,6 @@ Die Kennungen `K-…`, `E-…`, `A-…`, `M-…`, `MA-…` verweisen auf Regeln 
 | ◇ | anders umgesetzt, bewusst entschieden |
 | ➕ | ergänzt, fehlte in den Anforderungen |
 | ✖ | gestrichen |
-| ⚠ | **Abweichung, die noch aufzulösen ist** |
 
 ---
 
@@ -29,11 +27,10 @@ Die Kennungen `K-…`, `E-…`, `A-…`, `M-…`, `MA-…` verweisen auf Regeln 
 | ◇ anders umgesetzt | 9 Punkte | Stellgrößen-Kennlinie, `DEAKTIVIERT`, Zeiteinheiten, Sollwertquelle, Diagnose-Objekte |
 | ➕ ergänzt | 8 Bereiche | Sendebedingungen, Masterüberwachung, Mittelstellung, Hardwarevarianten, PWM-Frequenz, Logikmodul |
 | ✖ gestrichen | 4 Punkte | `KNOTEN_ID`, `GRUPPEN_ID`, `KENNLINIE_STELLGROESSE`, TypeSelect-Kopplung |
-| ⚠ offen | **7 Punkte** | Abschnitt 5 — davon 4 mit funktionaler Wirkung |
 
 **Kurzfassung:** fachlich trägt das Konzeptpapier. Die Abweichungen betreffen fast
-ausschließlich die Übersetzung in Bus- und ETS-Mechanik. Die sieben offenen Punkte in
-Abschnitt 5 sind der eigentliche Inhalt dieses Dokuments.
+ausschließlich die Übersetzung in Bus- und ETS-Mechanik. Offene Abweichungen gibt es keine
+mehr.
 
 ---
 
@@ -102,8 +99,6 @@ AxiRev 126 liegen die Kennlinien übereinander. Ohne Rückfall lieferte Richtung
 symmetrischer Konfiguration 0 statt des negativen Wertes — die Pflicht zur Doppeleingabe hätte
 also vor allem Fehlerquellen geschaffen. Wer zwei Kennlinien pflegt, bekommt zwei.
 
-Siehe aber ⚠ 5.6.
-
 ### 3.4 Sollwertquelle des Masters: aus „darf" wird eine Auswahl
 
 MA-3 erlaubt dem Master, `LEISTUNG_SOLL` aus einer Bedarfsgröße zu bilden. Umgesetzt ist das
@@ -143,6 +138,7 @@ sie erhält.
 | `ANLAUFPULS_DAUER` | typisch 100–500 ms | **0–10000 ms**, Vorgabe 0 | Puls erst auf der Hardware verifizieren |
 | `FREIGABE_UEBERWACHUNGSZEIT` | „Zeit" | **0–60 min**, Vorgabe 2, 0 = aus | Minuten statt Stunden; 0 erlaubt Anlagen ohne verknüpfte Freigabe |
 | `ZYKLUSZEIT` | „Zeit" | **0–3600 s**, Vorgabe 40 | |
+| Überwachungszeit Master | — | **0–3600 s**, Vorgabe 35, 0 = aus | **In Sekunden**, weil die Zeit unter einer Zykluszeit bleiben muss — in Minuten wäre schon der kleinste Wert das Anderthalbfache der Vorgabe-Zykluszeit |
 | Sendeabstand Lebenszeichen | — | **1–60 min**, Vorgabe 1 | |
 
 Die Totzeit liegt **innerhalb** der Zykluszeit, sie kommt nicht obendrauf (offene Frage O-1 der
@@ -220,110 +216,7 @@ grundsätzlich nicht möglich. Genau das sagt A-1 bereits.
 
 ---
 
-## 5. Offene Abweichungen ⚠
-
-Hier weicht die Software von einer Anforderung ab, **ohne** dass die Abweichung entschieden
-wurde. Vier davon haben funktionale Wirkung.
-
-### 5.1 E-1f: Die Freigabe-Überwachung startet nach Neustart nicht
-
-**Anforderung:** War zuletzt `FREIGABE = 1` gespeichert, läuft der Knoten wieder an, und die
-Überwachung nach E-1b greift **sofort** — bleibt die zyklische Aktualisierung aus, sperrt der
-Knoten nach Ablauf der Überwachungszeit erneut.
-
-**Umgesetzt:** Die Überwachung beginnt erst mit dem **ersten empfangenen** Freigabe-Telegramm.
-Nach einem Neustart ist der Zeitstempel des letzten Telegramms 0 und die Überwachung bleibt
-untätig. Ein Gerät, das mit gespeicherter Freigabe startet und dann keine Telegramme mehr
-bekommt — abgezogene Buslinie, ausgefallener Druckwächter — läuft **unbegrenzt weiter**.
-
-**Warum es so ist:** derselbe Mechanismus lässt eine Anlage normal laufen, die das
-Freigabe-Objekt nie verknüpft hat. Ohne ihn sperrt jedes solche Gerät zwei Minuten nach dem
-Einschalten. Die beiden Anforderungen widersprechen sich: E-1f setzt voraus, dass die Freigabe
-immer verknüpft ist.
-
-**Wirkung:** sicherheitsrelevant. Genau der Fall, für den das Ruhestromprinzip gedacht ist.
-
-**Auflösungsvorschlag:** ein persistentes Bit „Freigabe wurde schon einmal empfangen"
-zusätzlich zum Latch. Ist es gesetzt, läuft die Überwachung ab dem Neustart; ist es nie gesetzt
-worden, ist das Objekt offensichtlich nicht verknüpft und die Überwachung bleibt aus. Kostet ein
-Flash-Bit und löst beide Fälle. Alternativ: Überwachungszeit 0 als dokumentierte Pflichtangabe
-für Anlagen ohne Freigabe, dann greift E-1f wörtlich.
-
-### 5.2 M-14: `Freigabe = 0` beendet die Stoßlüftung nicht
-
-**Anforderung:** `FREIGABE = 0` beendet die Stoßlüftung sofort.
-
-**Umgesetzt:** Die Freigabe unterdrückt den Lauf, die Stoßlüftungszeit läuft aber im
-Hintergrund weiter ab. Kehrt die Freigabe vor Ablauf zurück, wird der Rest gefahren.
-
-**Wirkung:** gering. Der Lüfter steht während der Sperre in jedem Fall. Auffällig wird es nur,
-wenn die Freigabe innerhalb der Stoßlüftungsdauer zurückkommt.
-
-**Auflösung:** eine Zeile — beim Wechsel auf gesperrt die Stoßlüftungszeit verwerfen.
-Entscheidbar, sobald geklärt ist, ob die Rückkehr den Rest fahren *soll*.
-
-### 5.3 MA-7: Der Ersatzzustand bei Masterausfall ist nicht konfigurierbar
-
-**Anforderung:** Bei Ausfall des Masters gehen die Slaves in einen **konfigurierbaren**
-Ersatzzustand.
-
-**Umgesetzt:** Der Ersatzzustand ist fest: bis zum Ablauf der Überwachungszeit gilt der letzte
-Zustand, danach Leistung 0. Nicht wählbar.
-
-**Wirkung:** gering. „Letzter Zustand, dann aus" ist die sichere Variante. Ein Parameter
-„Ersatzleistung" wäre nachrüstbar, ohne das Layout zu brechen.
-
-### 5.4 MA-8: Ein Slave ohne Master ist nicht mehr im Grundbetrieb funktionsfähig
-
-**Anforderung:** Slaves bleiben ohne Master lokal bedienbar und im Grundbetrieb
-funktionsfähig.
-
-**Umgesetzt:** Nach Ablauf der Master-Überwachungszeit liefert die Leistungsberechnung
-bedingungslos 0 — auch ein direkt auf das Leistungs-Objekt geschriebener Wert wird ignoriert.
-Der Zustand endet erst, wenn wieder ein Lebenszeichen eintrifft.
-
-**Wirkung:** ein Notbetrieb per Hand ist nicht möglich, solange der Master fehlt. Bei einem
-dauerhaft ausgefallenen Master steht die Anlage, obwohl die Slaves technisch fahren könnten.
-
-**Auflösungsvorschlag:** ein direkt empfangener Leistungswert setzt den Timeout-Zustand
-zurück, oder die Blockade wirkt nur auf die zuletzt vom Master empfangene Vorgabe. Beides
-berührt das Layout nicht.
-
-### 5.5 Vorgabewerte verletzen die eigene Empfehlung zur Überwachungszeit
-
-Die Analyse hielt fest: die Master-Überwachungszeit sollte **≤ eine Zykluszeit** betragen,
-sonst fördert ein reversierender Knoten ohne Takt so lange in eine Richtung, dass die
-Gebäudebilanz merklich kippt, bevor die Abschaltung greift.
-
-Die Vorgabewerte sind **Zykluszeit 40 s** und **Überwachungszeit Master 5 min** — Faktor 7,5
-darüber. Ein Slave fördert im Vorgabezustand also bis zu fünf Minuten einseitig weiter.
-
-**Auflösungsvorschlag:** Vorgabe der Überwachungszeit auf einen Wert in der Größenordnung der
-Zykluszeit senken. Da die Überwachungszeit in Minuten eingegeben wird und die Zykluszeit in
-Sekunden, ist 1 min der kleinste sinnvolle Wert — bei 40 s Zyklus noch Faktor 1,5. Sauberer
-wäre eine Überwachungszeit in Sekunden.
-
-### 5.6 K-7: Volumenstromausgabe hängt allein an Kennlinie A
-
-Die Freigabe der Volumenstromausgabe prüft nur den Endpunkt der Kennlinie A. Wer ausschließlich
-Kennlinie B pflegt und A leer lässt, bekommt keine Ausgabe.
-
-**Wirkung:** minimal — A ist per Definition die Pflichtkennlinie und in jedem Kanaltyp
-vorhanden, eine reine B-Konfiguration ist nicht sinnvoll. Aufgeführt, weil es eine stille
-Annahme ist und nicht aus der ETS hervorgeht.
-
-### 5.7 Master und Slave im selben Gerät sprechen über den Bus
-
-Ein Gerät hostet zwei Knoten. Ist einer Master und der andere Slave, laufen die Telegramme
-zwischen ihnen trotzdem über den Bus und müssen in der ETS verknüpft werden. Eine geräteinterne
-Kopplung wurde erwogen und ist **nicht** umgesetzt.
-
-**Wirkung:** etwas Buslast und ein Verknüpfungsschritt, der sich vergessen lässt — dann läuft
-der Slave in den Master-Timeout, obwohl der Master im selben Gerät sitzt.
-
----
-
-## 6. Layout: beschlossen gegen umgesetzt
+## 5. Layout: beschlossen gegen umgesetzt
 
 Die alte Fassung dieses Dokuments nannte hier Zahlen, die sich während der Umsetzung geändert
 haben. Verbindlich ist die rechte Spalte, verifiziert gegen `include/knxprod.h`.
@@ -352,7 +245,7 @@ ApplicationNumber ist noch die alte und vor dem ersten externen Test umzustellen
 
 ---
 
-## 7. Erledigte Detailfragen
+## 6. Erledigte Detailfragen
 
 Die alte Fassung führte sieben offene Detailfragen. Stand jetzt:
 
@@ -362,13 +255,13 @@ Die alte Fassung führte sieben offene Detailfragen. Stand jetzt:
 | Fällt `Störung` selbsttätig? | **Gemischt.** Master-Timeout löst sich selbst, sobald ein Lebenszeichen eintrifft. Die Blockiermeldung ist selbsthaltend und braucht eine Quittierung. Ein ungültiger Empfangswert verfällt mit dem nächsten gültigen. |
 | Sockelwert des Totbands: fest oder Parameter? | **Parameter**, je Analogausgang. |
 | Ungültige Richtungsart-Codes? | **Abweisen und melden**, Fehlercode 4. Der letzte gültige Wert bleibt. |
-| Vorgabe der Master-Überwachungszeit? | 5 min — **verletzt die eigene Empfehlung**, siehe ⚠ 5.5. |
-| Master und Slave im selben Gerät koppeln? | **Nicht umgesetzt**, siehe ⚠ 5.7. |
+| Vorgabe der Master-Überwachungszeit? | **35 s**, bei 40 s Vorgabe-Zykluszeit. Deshalb in Sekunden statt Minuten — in Minuten war die Empfehlung „≤ eine Zykluszeit" nicht darstellbar. |
+| Master und Slave im selben Gerät koppeln? | **Nicht umgesetzt.** Die Telegramme laufen auch geräteintern über den Bus und sind in der ETS zu verknüpfen. |
 | ConfigTransfer-Format für ein Begleit-Tool? | **Offen**, kein Tool gebaut. Das Format ist laut ConfigTransfer-README noch Entwurf. |
 
 ---
 
-## 8. Unverändert übernommen ✔
+## 7. Unverändert übernommen ✔
 
 Zur Abgrenzung — alles Folgende gilt wörtlich wie im Anforderungsdokument und ist oben
 deshalb **nicht** aufgeführt:
@@ -380,9 +273,17 @@ Phase/Gegenphase, Richtung A/B, Taktzustand, Zyklus, Leistung, Anteilsfaktor.
 **Kennlinienregeln:** K-1, K-2, K-4, K-5, K-6, K-8, K-9, K-10. K-3 gilt weiter, nur anders
 ausgedrückt (3.1). K-7 gilt mit einer Einschränkung (3.3).
 
-**Freigabe:** E-1, E-1a, E-1b, E-1c, E-1d, E-1e, E-1g, E-1h. Zwei unabhängige Sperrauslöser,
-selbsthaltend, persistent, Ruhestromprinzip, unverzüglicher Stopp ohne Rücksicht auf Totzeit,
-Stoßlüftung oder anstehende Taktumschaltung. E-1f weicht ab (⚠ 5.1).
+**Freigabe:** E-1 bis E-1h vollständig. Zwei unabhängige Sperrauslöser, selbsthaltend,
+persistent, Ruhestromprinzip, unverzüglicher Stopp ohne Rücksicht auf Totzeit, Stoßlüftung oder
+anstehende Taktumschaltung.
+
+E-1f verlangt, dass die Überwachung nach einem Neustart **sofort** wieder greift. Dafür genügt
+der Zeitstempel des letzten Telegramms nicht, denn der ist nach dem Neustart leer. Umgesetzt ist
+deshalb ein zusätzliches **persistentes Bit „Freigabe wurde schon einmal empfangen"**: ist es
+gesetzt, läuft die Überwachungszeit ab dem Neustart, ohne auf ein erstes Telegramm zu warten.
+Ist es nie gesetzt worden, ist das Objekt offensichtlich nicht verknüpft und die Überwachung
+bleibt aus — sonst würde jede Anlage ohne Freigabe-Konzept nach zwei Minuten sperren. Damit sind
+beide Fälle erfüllt, ohne sie gegeneinander auszuspielen.
 
 Die Tabelle in **M-6** ist damit an einer Stelle zu korrigieren: `FREIGABE = 0` bleibt nach
 Neustart erhalten (**ja**, nicht nein). E-1e sagt das bereits, die Tabelle widersprach ihm.
@@ -394,18 +295,12 @@ Summierbarkeit über mehrere Knoten.
 
 **Betrieb:** M-1, M-2, M-3, M-4, M-5, M-7, M-8, M-9, M-11, M-12, M-13, M-15.
 
-**Master:** MA-1, MA-2, MA-3, MA-4, MA-5, MA-6. MA-7 und MA-8 weichen ab (⚠ 5.3, 5.4).
+**Master:** MA-1, MA-2, MA-3, MA-4, MA-5, MA-6.
 
 ---
 
-## 9. Sicherheitshinweis
+## 8. Sicherheitshinweis
 
 KNX ist **kein Sicherheitsbus**. E-1h benennt das richtig: für den Verbund mit einer Feuerstätte
 ist üblicherweise ein fest verdrahteter, potentialfreier Kontakt gefordert; der Busweg ist
 Ergänzung, nicht Ersatz. Das gehört in die Produktdokumentation.
-
-Verstärkt wird der Hinweis durch ⚠ 5.1: solange die Freigabe-Überwachung nach einem Neustart
-nicht anläuft, ist der Busweg schwächer, als E-1b beschreibt.
-
-**Nichts davon ist auf Hardware getestet.** PWM-Polarität, Schaltrichtung des Lastschalters und
-Tacho-Auswertung sind unverifiziert.

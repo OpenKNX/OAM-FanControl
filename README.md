@@ -3,8 +3,8 @@
 KNX application for decentralised ventilation with reversing fans. One device drives two fan
 nodes; several nodes form a group over shared group addresses, coordinated by one master.
 
-> **Status: development.** Nothing has been verified on hardware yet. The KO and parameter
-> layout is frozen but the application number is still provisional.
+> **Status: development.** The KO and parameter layout is frozen, but the application number is
+> still provisional.
 
 ## Concept
 
@@ -21,6 +21,24 @@ runs exhaust air, and they swap on every cycle.
 moving air in opposite directions](references/%C3%9Cbersicht.drawio.png)
 
 *Diagram in German. Source: [`references/Übersicht.drawio`](references/Übersicht.drawio).*
+
+### Signal flow per channel
+
+Both roles run the same firmware and the same seven processing stages. What differs is where the
+setpoint comes from and which objects are sent rather than received.
+
+A channel configured as **master** produces the group setpoint, the tact and the keep-alive:
+
+![Master channel: inputs, seven processing stages, outputs, including the group objects the
+master sends cyclically](references/IO-Uebersicht-Master.drawio.png)
+
+The same channel as **slave** receives all of that on the same group addresses:
+
+![Slave channel: the group objects are receive objects here, direction is derived from the
+received tact and the channel's own phase assignment](references/IO-Uebersicht-Slave.drawio.png)
+
+*Diagrams in German. Source: [`references/IO-Uebersicht.drawio`](references/IO-Uebersicht.drawio).
+KO numbers are relative to the channel — channel 1 = KO 20…51, channel 2 = KO 52…83.*
 
 ## Features
 
@@ -46,11 +64,9 @@ potential-free contact.
 
 ## Documentation
 
-- [`../OFM-FanControl/doc/Applikationsbeschreibung-Fan.md`](https://github.com/cad435/OFM-FanControl/blob/dev/doc/Applikationsbeschreibung-Fan.md)
-  — user documentation, parameter by parameter. Also the source of the ETS context help.
-  Start here.
-- [`CLAUDE.md`](CLAUDE.md) — developer reference: build commands, frozen layout, the gotchas
-  that cost time.
+[`../OFM-FanControl/doc/Applikationsbeschreibung-Fan.md`](https://github.com/cad435/OFM-FanControl/blob/dev/doc/Applikationsbeschreibung-Fan.md)
+is the user documentation, parameter by parameter, and the source of the ETS context help.
+Start there.
 
 The two documents in [`references/`](references/) are a pair, both in German:
 
@@ -58,38 +74,59 @@ The two documents in [`references/`](references/) are a pair, both in German:
   — the original concept paper, written from the perspective of the trades that build and run
   the system, deliberately without any knowledge of the KNX bus.
 - [`Review_Anforderungen_KNX-Sicht.md`](references/Review_Anforderungen_KNX-Sicht.md)
-  — **where the software deviates from it, and why.** Includes the deviations that are still
-  open, four of which have functional consequences.
+  — **where the software deviates from it, and why.**
 
 ## Hardware
 
-Two boards are supported. Which one is built is a compile-time decision, not an ETS option —
-PWM polarity and the number of outputs differ. The ETS application is identical for both.
+The reference hardware is the
+**[OpenKNX REG1-FanAktor-2x](https://github.com/cad435/OpenKNX-REG1-App-2xFan)** — an addon board
+for the [OpenKNX REG1](https://github.com/OpenKNX/OpenKNX-REG1) module system, DIN rail, 1TE. It
+is the only variant with a tacho input, so speed feedback, volume flow and blockage detection are
+available there.
 
-| | OpenKNX Reg1 Fan-Addon-X2 | [MrSpieb HW-FanControl](https://github.com/mrspieb/HW-FanController) |
+The [MrSpieb HW-FanControl](https://github.com/mrspieb/HW-FanController) board is the original
+this application was written for and stays supported.
+
+Which board is built is a compile-time decision, not an ETS option — PWM polarity and the number
+of outputs differ. The ETS application is identical for both.
+
+| | REG1-FanAktor-2x (reference) | HW-FanControl (original) |
 |---|---|---|
 | Outputs per node | one | two, mirrored (identical signal, one fan each) |
-| Tacho input | yes, opto-coupled | no |
+| Tacho input | yes, opto-coupled, 2 pulses per revolution | no |
 | PWM polarity | inverted (level shifter driving an NMOS with pull-up) | not inverted |
 | Build environment | `develop_RP2040` | `develop_RP2040_MrSpieb` |
 
-Tested fan types: Maico PPB series and Fawas Air Solitaire 160 (ebm-papst AxiRev 126). Any
+Target fan types: Maico PPB series and Fawas Air Solitaire 160 (ebm-papst AxiRev 126). Any
 reversing fan that takes speed and direction on one PWM input should work.
 
 MCU is an RP2040. The KNX transceiver is an NCN5120.
 
+Note on the PWM pull-up: most off-the-shelf fans have one built in. OEM variants in integrated
+ventilation systems often do not, and their reference voltage differs by manufacturer — the
+REG1 board carries solder bridges for that case, see its documentation.
+
 ## Building
 
-See [`CLAUDE.md`](CLAUDE.md) for the full command reference. Dependencies are symlinked into
-`lib/` by `restore/Restore-Dependencies.ps1`, which needs an elevated PowerShell.
+Dependencies are cloned to the parent directory and symlinked into `lib/` by
+`restore/Restore-Dependencies.ps1`. It needs an **elevated** PowerShell, because creating
+directory symlinks on Windows requires administrator rights.
 
 ```powershell
+# once, from an elevated PowerShell
+cd restore; .\Restore-Dependencies.ps1
+
 # ETS product database and knxprod.h
 & (Join-Path $env:USERPROFILE "bin/OpenKNXproducer.exe") create -h include/knxprod.h src/Fan.xml
 
-# Firmware
+# firmware, one of the two variants
 platformio run -e develop_RP2040
+platformio run -e develop_RP2040_MrSpieb
 ```
+
+`include/knxprod.h` is generated — never edit it by hand. Re-run the producer after any change
+to `src/Fan.xml` or the module XMLs, and read *its* output first when a build suddenly fails
+with unknown identifiers.
 
 ## Contributing
 
