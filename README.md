@@ -18,6 +18,12 @@ Direction is never commanded directly. Each node derives its own airflow directi
 phase assignment and the master's tact, so half the group runs supply air while the other half
 runs exhaust air, and they swap on every cycle.
 
+**The master may also sit outside the device.** A node cannot tell whether its power setpoint
+came from a master, from a hand switch or from a controller, so leaving every channel as a slave
+and giving each power object its own group address turns the device into eight independently
+controllable fans, driven by a visualisation, a server or a logic block. Nothing needs to be
+switched over for that — see *Betriebsfälle* in the application description.
+
 ![Group topology: one master and three slaves on shared group addresses, phase and counter-phase
 moving air in opposite directions](references/%C3%9Cbersicht.drawio.png)
 
