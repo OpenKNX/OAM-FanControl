@@ -1,7 +1,7 @@
 # OpenKNX FanControl
 
 KNX application for decentralised ventilation with reversing fans. A device drives up to eight
-fan nodes -- as many as its board has outputs; several nodes form a group over shared group
+fan nodes — as many as its board has outputs; several nodes form a group over shared group
 addresses, coordinated by one master.
 
 > **Status: development.** The KO and parameter layout is frozen, but the application number is
@@ -43,10 +43,10 @@ KO numbers are relative to the channel — channel 1 = KO 20…51, channel 2 = K
 
 ## Features
 
-- **Up to 8 fans per device**, set by one counter under *Allgemein*. Each fan then carries its
-  own mode: reversible (two airflow directions, tact) or non-reversible. How many fans really
-  have outputs is a property of the board, not of the ETS — configuring more is reported as a
-  fault at startup.
+- **8 fan channels**, each switched on or off individually in the channel selection tab and
+  carrying its own mode: reversible (two airflow directions, tact) or non-reversible. How many
+  channels really have outputs is a property of the board, not of the ETS — activating more is
+  reported as a fault at startup.
 - **Bipolar drive** for reversing fans: speed and direction on a single output. 0 % is full
   speed in direction A, the midpoint is standstill, 100 % is full speed in direction B. The
   midpoint is the safe state. Non-reversible fans are driven conventionally.
