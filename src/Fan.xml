@@ -33,7 +33,7 @@
   <op:define prefix="FAN" ModuleType="20"
     share="../lib/OFM-FanControl/src/Fan.share.xml"
     template="../lib/OFM-FanControl/src/Fan.templ.xml"
-    NumChannels="2"
+    NumChannels="8"
     KoOffset="20"
     >
     <op:verify File="../lib/OFM-FanControl/library.json" ModuleVersion="%ReleaseApplicationVersion%" />
@@ -43,12 +43,13 @@
        ModuleType 10 ist kein Tippfehler: das Logikmodul legt seine Versionsinformation unter
        dem Typ des BASE-Moduls ab, deshalb teilen sich beide den Wert. Der Producer prueft das
        und meckert bei jedem anderen Wert.
-       KoOffset 280 laesst der Lueftersteuerung (KO 20..83) reichlich Abstand. -->
+       KoOffset 512 laesst der Lueftersteuerung Platz: 8 Kanaele belegen KO 20..275,
+       ein spaeteres neuntes KO im Block waere bei 280 schon eine Kollision. -->
   <op:define prefix="LOG" ModuleType="10"
     share="../lib/OFM-LogicModule/src/Logikmodul.share.xml"
     template="../lib/OFM-LogicModule/src/Logikmodul.templ.xml"
     NumChannels="30"
-    KoOffset="280">
+    KoOffset="512">
     <op:verify File="../lib/OFM-LogicModule/library.json" ModuleVersion="4.4" />
   </op:define>
 

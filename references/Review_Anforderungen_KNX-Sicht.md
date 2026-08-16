@@ -78,8 +78,14 @@ Der Parameter deckte zwei Fälle ab, die OpenKNX trennt:
 
 | Fall in den Anforderungen | Umsetzung | Wirkung |
 |---|---|---|
-| „nicht bestückter Kanal" | **Kanaltyp = Deaktiviert** in der Kanalauswahl | kein Kanalreiter, keine KOs — spart 32 KO-Nummern |
+| „nicht bestückter Kanal" | **Zähler „Anzahl Lüfter"** unter *Allgemein*, 1…8 | nur so viele Lüfter-Reiter und Tabellenzeilen wie eingestellt |
 | „Service, Fehlersuche" (M-3…M-5) | **Suspendiert**: ETS-Parameter als Anfangswert, KO als Laufzeit-Übersteuerung, im Flash gehalten | KOs und Verknüpfungen bleiben, die Funktion ruht |
+
+Ein Kanaltyp mit dem Wert „Deaktiviert" wäre die dritte Variante gewesen und ist bewusst
+entfallen: **wie viele** Lüfter es gibt, ist eine Geräteeigenschaft und gehört einmal nach
+*Allgemein*; **welcher Art** ein vorhandener Lüfter ist, gehört an den Lüfter. Der Modus
+(reversibel / nicht reversibel) steht deshalb auf dem Lüfter-Reiter, die Kanalauswahl trägt nur
+noch Nummer und Beschreibung.
 
 Dass der zweite Fall gemeint war, steht im Anforderungsdokument selbst: M-4 verlangt, der
 stillgelegte Knoten bleibe „über die Schnittstelle lesbar und parametrierbar". Das trifft nur
@@ -223,10 +229,17 @@ haben. Verbindlich ist die rechte Spalte, verifiziert gegen `include/knxprod.h`.
 
 | | Beschlossen | Umgesetzt |
 |---|---|---|
-| KOs je Kanal | 29er-Block, 23 belegt, Kanal 1 = KO 20–48 | **32er-Block, 22 belegt**, Kanal 1 = **KO 20–51**, Kanal 2 = **52–83** |
+| KOs je Kanal | 29er-Block, 23 belegt, Kanal 1 = KO 20–48 | **32er-Block, 22 belegt**, Kanal 1 = **KO 20–51** … Kanal 8 = **244–275** |
 | Freie KO-Nummern | 8, 9, 20–23 | **9, 20–26, 28, 29** (8 ist jetzt der Istwert-Eingang) |
-| Parameter je Kanal | 80 Byte, 52 belegt | 80 Byte, **62 belegt**, 18 frei |
-| Knoten je Gerät | 2 | 2 |
+| Parameter je Kanal | 80 Byte, 52 belegt | 80 Byte, **62 belegt**, Rest Reserve |
+| Knoten je Gerät | 2 | **bis 8 in der ETS**, real so viele wie das Board Ausgänge hat |
+| Logikmodul | `KoOffset 280` | **`KoOffset 512`** — 8 Lüfterkanäle reichen bis KO 275 |
+
+Die Kanalzahl der Applikation und die des Boards sind getrennt: die ETS bietet 8 an, das
+Geräte-Header sagt über `FAN_BOARD_CHANNELS` und `FAN_BOARD_PIN_TABLE`, wie viele davon Pins
+haben (beide Boards derzeit 2). Die Firmware dimensioniert ihre Felder nach der **Board**-Zahl,
+ein höherer ETS-Wert kostet also KO-Nummern und Parameterspeicher, aber kein RAM. Mehr Lüfter zu
+konfigurieren als das Board treiben kann, wird beim Start als Fehler protokolliert.
 
 Die freien KO-Nummern liegen **innerhalb** des Blocks, nicht am Ende. Der OpenKNXproducer
 leitet die Blockgröße ausschließlich aus der höchsten benutzten `%Kn%`-Nummer ab; ein Attribut

@@ -30,3 +30,13 @@
 // No tacho inputs on this board
 #define FAN1_TACHO_PIN -1
 #define FAN2_TACHO_PIN -1
+
+// --- How many fans this board can actually drive ---
+// Two nodes, each with a mirrored pair of outputs. Everything the ETS configures beyond this
+// has no pins and is reported as a configuration fault. Order matches the ETS channels.
+#define FAN_BOARD_CHANNELS 2
+#define FAN_BOARD_PIN_TABLE                                              \
+    {                                                                    \
+        {FAN1_S1_PWM_PIN, FAN1_S2_PWM_PIN, FAN1_SW_PIN, FAN1_TACHO_PIN}, \
+        {FAN2_S1_PWM_PIN, FAN2_S2_PWM_PIN, FAN2_SW_PIN, FAN2_TACHO_PIN}, \
+    }

@@ -43,3 +43,15 @@
 // PWM inputs are high impedance. Both fans of one device always turn the same way anyway.
 #define FAN1_S2_PWM_PIN -1
 #define FAN2_S2_PWM_PIN -1
+
+// --- How many fans this board can actually drive ---
+// The ETS lets the user configure up to FAN_ChannelCount fans, which is a property of the
+// application, not of the board. This table is the board's answer: everything beyond it has
+// no pins and is reported as a configuration fault instead of silently doing nothing.
+// Order matches the ETS channels.
+#define FAN_BOARD_CHANNELS 2
+#define FAN_BOARD_PIN_TABLE                                              \
+    {                                                                    \
+        {FAN1_S1_PWM_PIN, FAN1_S2_PWM_PIN, FAN1_SW_PIN, FAN1_TACHO_PIN}, \
+        {FAN2_S1_PWM_PIN, FAN2_S2_PWM_PIN, FAN2_SW_PIN, FAN2_TACHO_PIN}, \
+    }

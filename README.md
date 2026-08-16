@@ -1,7 +1,8 @@
 # OpenKNX FanControl
 
-KNX application for decentralised ventilation with reversing fans. One device drives two fan
-nodes; several nodes form a group over shared group addresses, coordinated by one master.
+KNX application for decentralised ventilation with reversing fans. A device drives up to eight
+fan nodes -- as many as its board has outputs; several nodes form a group over shared group
+addresses, coordinated by one master.
 
 > **Status: development.** The KO and parameter layout is frozen, but the application number is
 > still provisional.
@@ -42,7 +43,10 @@ KO numbers are relative to the channel — channel 1 = KO 20…51, channel 2 = K
 
 ## Features
 
-- **Two channel types** — reversible (two airflow directions, tact) and non-reversible.
+- **Up to 8 fans per device**, set by one counter under *Allgemein*. Each fan then carries its
+  own mode: reversible (two airflow directions, tact) or non-reversible. How many fans really
+  have outputs is a property of the board, not of the ETS — configuring more is reported as a
+  fault at startup.
 - **Bipolar drive** for reversing fans: speed and direction on a single output. 0 % is full
   speed in direction A, the midpoint is standstill, 100 % is full speed in direction B. The
   midpoint is the safe state. Non-reversible fans are driven conventionally.
@@ -92,7 +96,7 @@ of outputs differ. The ETS application is identical for both.
 
 | | REG1-FanAktor-2x (reference) | HW-FanControl (original) |
 |---|---|---|
-| Outputs per node | one | two, mirrored (identical signal, one fan each) |
+| Fan outputs | 2 | 2 nodes, each mirrored (identical signal, one fan each) |
 | Tacho input | yes, opto-coupled, 2 pulses per revolution | no |
 | PWM polarity | inverted (level shifter driving an NMOS with pull-up) | not inverted |
 | Build environment | `develop_RP2040` | `develop_RP2040_MrSpieb` |
