@@ -3,6 +3,7 @@
 #include "OpenKNX.h"
 #include "FanModule.h"
 #include "Logic.h"
+#include "FileTransferModule.h"
 
 void setup()
 {
@@ -13,7 +14,9 @@ void setup()
     // damit die bereits gespeicherten Werte (Freigabe-Latch, Betriebsstunden) liegen bleiben.
     openknx.addModule(1, openknxFanModule);
     openknx.addModule(2, openknxLogic);
-    //openknx.addModule(9, openknxFileTransferModule); Es können auch weitere Module hinzugefügt werden
+    // Id 9 ist die OpenKNX-Konvention fuer den Dateitransfer. Das Modul braucht keine
+    // ETS-Einbindung, aber ein Dateisystem - siehe RP2040_16MB in platformio.custom.ini.
+    openknx.addModule(9, openknxFileTransferModule);
     openknx.setup();
 }
 
