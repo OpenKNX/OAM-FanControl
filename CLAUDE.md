@@ -11,9 +11,8 @@ ebm-papst AxiRev) on RP2040.
 
 | Document | Content |
 |---|---|
-| `references/Anforderungen_Dezentrale_Lueftersteuerung.md` | Original functional requirements, bus-agnostic |
-| `references/Review_Anforderungen_KNX-Sicht.md` | KNX pass over them: 17 decisions, change list Ä-1…Ä-12, rules S-1…S-9 |
-| `references/Funktionsspezifikation.md` | Consolidated "this is how it works" |
+| `references/Anforderungen_Dezentrale_Lueftersteuerung.md` | Original concept paper, bus-agnostic. Frozen, not maintained |
+| `references/Review_Anforderungen_KNX-Sicht.md` | **Where the software deviates from it.** Section 5 holds the 7 unresolved deviations, section 6 the verified layout |
 | `../OFM-FanControl/doc/Applikationsbeschreibung-Fan.md` | User documentation **and** source of the ETS context help |
 | `../../FirmwareEntwicklung_TAS_UP/TAS-UP-4x-TouchRGB/doc/OpenKNX-ETS-XML-Styleguide.md` | OpenKNX ETS-XML conventions |
 
@@ -173,5 +172,6 @@ cd ../OFM-FanControl && git checkout dev
 - Nothing has been tested on hardware: PWM polarity, load-switch direction, tacho counting.
 - `../OFM-FanControl/test/test_fan_logic.cpp` still tests the deleted `Fan` class and no host
   compiler exists on this machine, so `pio test -e native` cannot run here at all.
-- `references/Funktionsbeschreibung.md` is the current state. The two requirement documents and
-  `Funktionsspezifikation.md` carry an outdated banner and are not maintained any more.
+- **7 deviations from the requirements are unresolved** — `references/Review_Anforderungen_KNX-Sicht.md`
+  section 5. Four have functional consequences; the enable watchdog not starting after a restart
+  (5.1) is the safety-relevant one.

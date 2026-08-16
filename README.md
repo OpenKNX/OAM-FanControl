@@ -46,12 +46,20 @@ potential-free contact.
 
 ## Documentation
 
-- [`references/Funktionsbeschreibung.md`](references/Funktionsbeschreibung.md) — the current
-  functional state: every parameter, every communication object, the full behaviour. Start here.
 - [`../OFM-FanControl/doc/Applikationsbeschreibung-Fan.md`](https://github.com/cad435/OFM-FanControl/blob/dev/doc/Applikationsbeschreibung-Fan.md)
-  — user documentation and source of the ETS context help.
-- `references/Review_Anforderungen_KNX-Sicht.md` — why the functions look the way they do.
-  Superseded as a specification, kept as rationale.
+  — user documentation, parameter by parameter. Also the source of the ETS context help.
+  Start here.
+- [`CLAUDE.md`](CLAUDE.md) — developer reference: build commands, frozen layout, the gotchas
+  that cost time.
+
+The two documents in [`references/`](references/) are a pair, both in German:
+
+- [`Anforderungen_Dezentrale_Lueftersteuerung.md`](references/Anforderungen_Dezentrale_Lueftersteuerung.md)
+  — the original concept paper, written from the perspective of the trades that build and run
+  the system, deliberately without any knowledge of the KNX bus.
+- [`Review_Anforderungen_KNX-Sicht.md`](references/Review_Anforderungen_KNX-Sicht.md)
+  — **where the software deviates from it, and why.** Includes the deviations that are still
+  open, four of which have functional consequences.
 
 ## Hardware
 

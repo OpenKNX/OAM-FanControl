@@ -11,11 +11,11 @@
 > (Freigabe-Persistenz), bei der Stellgrößen-Kennlinie, bei `KNOTEN_ID`/`GRUPPEN_ID` und bei
 > `DEAKTIVIERT`. Seit dem 14.08.2026 nicht mehr nachgeführt.
 >
-> **Der gültige Stand steht in `Funktionsbeschreibung.md`.**
-> Die Übersetzung in die KNX-Welt samt Begründungen und beschlossenen Änderungen steht in
-> `Review_Anforderungen_KNX-Sicht.md`.
+> **Wo die Software hiervon abweicht, steht in `Review_Anforderungen_KNX-Sicht.md`** — mitsamt
+> den Abweichungen, die noch aufzulösen sind.
 >
-> Aufgehoben als Beleg dafür, was fachlich ursprünglich gefordert war.
+> Dieses Dokument bleibt als Beleg dafür, was fachlich ursprünglich gefordert war. Es ist damit
+> die eine Hälfte des Paares: **Anforderung hier, Abweichung dort.**
 
 ---
 
