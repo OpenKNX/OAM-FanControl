@@ -1,19 +1,38 @@
 #pragma once
 
-// OpenKNX Reg1 Fan-Addon-X2 board
+// OpenKNX REG1 Fan-Addon-X2, mounted on a REG1-Controller2040 V1 behind a REG1-Front-RGB.
+//
+// Controller and front come from OGM-HardwareConfig and are selected, not copied: KNX UART,
+// save interrupt, prog button and the four WS2812B status LEDs on the front are defined there
+// and stay correct when the hardware definition is corrected upstream. Only the addon's own
+// pins live here — upstream does not know this board.
+//
+// What the two macros pull in:
+//   OKNXHW_REG1_CONTROLLER2040_V1  KNX UART on GPIO 0/1, save interrupt, front connector pins
+//   OKNXHW_REG1_FRONT_RGB          prog button on front pin 10 (GPIO 23), and the LED chain on
+//                                  front pin 8 (GPIO 25) as OPENKNX_SERIALLED with 4 LEDs:
+//                                  index 0 = prog (red), 1..3 = Info1..3 (green), plus the
+//                                  colour calibration for these parts
+//
+// This replaces hand-written defines that had two of them wrong: GPIO 25 was declared as an
+// ordinary prog LED, so the firmware drove a plain HIGH onto the WS2812 data line and all four
+// LEDs came up white; and the save interrupt was on 5 instead of 3.
+#define OKNXHW_REG1_CONTROLLER2040_V1
+#define OKNXHW_REG1_FRONT_RGB
 
-// --- Reg1 Base pins (matches SEN-REG1-PowerMeter-3Phase) ---
-#define PROG_LED_PIN 25
-#define PROG_LED_PIN_ACTIVE_ON HIGH
-#define PROG_BUTTON_PIN 23
-#define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
-#define SAVE_INTERRUPT_PIN 5
-#define KNX_UART_NUM 0
-#define KNX_UART_RX_PIN 1
-#define KNX_UART_TX_PIN 0
-
-// No dedicated status LED on Reg1 — reuse PROG_LED
-#define STATUS_LED_PIN PROG_LED_PIN
+// --- Werksbelegung der drei Info-LEDs ---
+// OGM-Common wertet diese optionalen Defines aus, solange die ETS-Checkbox "Standardbelegung"
+// gesetzt ist - also ab Werk und bei jedem unkonfigurierten Geraet. Ohne sie zeigt Info1 den
+// Geraetestatus und Info2/3 bleiben dunkel.
+//
+// Info1 behaelt bewusst den Geraetestatus: drei LEDs, zwei Luefter, da ist eine fuer den
+// Geraetezustand gut angelegt. Die Luefter kommen auf Info2 und Info3.
+//
+// Die Werte sind Fan::LedFunctionBase + Kanalindex aus FanTypes.h und muessen zu den
+// Enumerationswerten von PT-SLEDFunc in Fan.share.xml passen. Hier stehen sie als Zahl, weil
+// Hardware-Header lange vor den Modulheadern eingebunden werden.
+#define OPENKNX_INFOLED2_DEFAULT 110 // Luefter 1
+#define OPENKNX_INFOLED3_DEFAULT 111 // Luefter 2
 
 // --- PWM polarity ---
 // The level shifter drives an NMOS whose drain is pulled up to 5V, i.e. an inverting
@@ -24,6 +43,8 @@
 // input HIGH, which this fan family reads as full speed in direction B. What keeps that
 // harmless is the load switch — it defaults to off (GPIO low = open) until the firmware
 // enables it, so the fan is unpowered during that window.
+//
+// Verified on hardware 2026-08-16: midpoint stands still, both directions run.
 #define FAN_PWM_ACTIVE_LOW 1
 
 // --- Fan 1 (HW Channel A) ---
@@ -45,7 +66,7 @@
 #define FAN2_S2_PWM_PIN -1
 
 // --- How many fans this board can actually drive ---
-// The ETS lets the user configure up to FAN_ChannelCount fans, which is a property of the
+// The ETS lets the user activate up to FAN_ChannelCount channels, which is a property of the
 // application, not of the board. This table is the board's answer: everything beyond it has
 // no pins and is reported as a configuration fault instead of silently doing nothing.
 // Order matches the ETS channels.

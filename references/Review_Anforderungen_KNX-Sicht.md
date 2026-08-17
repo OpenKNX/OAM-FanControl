@@ -72,7 +72,7 @@ ist eine Eigenschaft des Motors, nicht der Förderrichtung.
 Kosten: 5 Byte statt rund 20–24 für zwei Polylinien. Rückholbar — Parameter dürfen angehängt
 werden, nur Umnummerieren und Entfernen ist verboten.
 
-### 3.2 `DEAKTIVIERT` → Kanaltyp + Suspendiert
+### 3.2 `DEAKTIVIERT` → Kanalaktivität + Suspendiert
 
 Der Parameter deckte zwei Fälle ab, die OpenKNX trennt:
 
@@ -206,6 +206,8 @@ Das fehlte in den Anforderungen, weil es ohne Bus- und Hardwarekenntnis nicht si
 | **Logikmodul** | 30 Kanäle, unverändert eingebunden. |
 | **Zweipunkt mit Hysterese** | Vierte Sollwertquelle, aus der Original-Firmware nachgeholt: schalten an zwei Schwellen statt proportional. Teilt Regelgröße und Istwert-Eingang mit dem P-Regler. |
 | **Taupunktwächter** | Master-Veto über allen Sollwertquellen: vergleicht den Taupunkt innen und außen und sperrt, wenn die Außenluft die feuchtere ist. Vier eigene Messwert-Objekte (KO 20–23), Hysterese über zwei Abstände, Überwachungszeit für die Messwerte und wählbares Verhalten, wenn sie fehlen. |
+| **Status-LEDs** | Eine RGB-LED je Lüfter auf Geräten, die sie haben: grün Richtung A, blau Richtung B, rot bei Störung, dunkel im Stillstand, 25 % Helligkeit. Die Anforderungen kennen keine örtliche Anzeige — sie entstanden ohne Kenntnis der Gerätehardware. Welche LED welchen Lüfter zeigt, wählt der Benutzer im BASE-Modul. |
+| **Konsolenbefehle** | Kanalzustände lesen und einen Lüfter zum Test ansteuern, ohne ETS und ohne Gruppenadresse — für die Erstinbetriebnahme, wenn die Verdrahtung vor der Projektierung geprüft werden soll. Die Übersteuerung ersetzt den Sollwert, nicht die Vetos, und verfällt nach 10 Minuten. |
 
 ### 4.1 Fehlercode
 

@@ -72,6 +72,11 @@ channel 8 = KO 244…275.*
   running state, direction, operating hours, fault and fault code.
 - **Blockage detection** — two consecutive 5 s windows without tacho pulses while the fan is
   commanded to run.
+- **Status LEDs** — one RGB LED per fan on boards that have them: green for direction A, blue for
+  direction B, red on fault, dark at standstill, at 25 % brightness. Which LED shows which fan is
+  chosen in the BASE module.
+- **Console commands** for commissioning — read every channel's state and drive a fan without ETS
+  or a group address. The override respects the safety vetoes and expires after 10 minutes.
 - **Logic module** included with 30 channels.
 
 KNX is not a safety bus. Interlocking with a fireplace additionally requires a hard-wired,
@@ -104,6 +109,12 @@ this application was written for and stays supported.
 
 Which board is built is a compile-time decision, not an ETS option — PWM polarity and the number
 of outputs differ. The ETS application is identical for both.
+
+The REG1 variant does not spell out the controller and front pins itself: it selects them from
+[OGM-HardwareConfig](https://github.com/OpenKNX/OGM-HardwareConfig) with two macros, so KNX UART,
+save interrupt, prog button and the four WS2812B status LEDs stay correct when that definition is
+corrected upstream. Only the addon board's own fan pins live in the device header, because
+upstream does not know that board.
 
 | | REG1-FanAktor-2x (reference) | HW-FanControl (original) |
 |---|---|---|

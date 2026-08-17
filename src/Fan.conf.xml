@@ -10,4 +10,12 @@
        Attribut. -->
   <op:config name="%ReleaseReplacesVersions%" value="0.1" />
 
+  <!-- Vorbelegung der Info-LED-Auswahl. Spiegelt die Werksbelegung aus dem Hardware-Header
+       (OPENKNX_INFOLED2/3_DEFAULT), damit sich nichts aendert, wenn der Benutzer die
+       Standardbelegung abwaehlt und die Dropdowns wirksam werden.
+       2 = Geraetestatus (BASE), 110/111 = Luefter 1/2 (PT-SLEDFunc aus Fan.share.xml). -->
+  <op:config name="%BASE_Info1LedFunc%" value="2" />
+  <op:config name="%BASE_Info2LedFunc%" value="110" />
+  <op:config name="%BASE_Info3LedFunc%" value="111" />
+
 </KNX>
