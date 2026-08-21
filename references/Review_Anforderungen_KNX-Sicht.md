@@ -251,7 +251,7 @@ haben. Verbindlich ist die rechte Spalte, verifiziert gegen `include/knxprod.h`.
 | Logikmodul | `KoOffset 280` | **`KoOffset 512`** — 8 Lüfterkanäle reichen bis KO 275 |
 
 Die Kanalzahl der Applikation und die des Boards sind getrennt: die ETS bietet 8 an, das
-Geräte-Header sagt über `FAN_BOARD_CHANNELS` und `FAN_BOARD_PIN_TABLE`, wie viele davon Pins
+Geräte-Header sagt über `FAN_BOARD_CHANNELS` und `FAN_INIT()`, wie viele davon Pins
 haben (beide Boards derzeit 2). Die Firmware dimensioniert ihre Felder nach der **Board**-Zahl,
 ein höherer ETS-Wert kostet also KO-Nummern und Parameterspeicher, aber kein RAM. Mehr Lüfter zu
 konfigurieren als das Board treiben kann, wird beim Start als Fehler protokolliert.

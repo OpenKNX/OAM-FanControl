@@ -47,16 +47,25 @@
 // Verified on hardware 2026-08-16: midpoint stands still, both directions run.
 #define FAN_PWM_ACTIVE_LOW 1
 
+// --- Fan pins, named against the REG1 APP connector ---
+// Not raw GPIO numbers: the addon sits on the standard REG1 APP connector, and which GPIO a
+// connector pin reaches depends on the controller. The Controller2040 V1 maps APP pins 1..7 to
+// GPIO 29/28/27/26/18/17/16; another REG1 controller maps the same pins to 12/15/13/5/8/7/…, so
+// hard-wired numbers would silently be wrong there.
+//
+// These expand lazily: a #define is substituted where it is *used*, inside the module, long after
+// hardware.h has pulled in <HardwareConfig.h>. So REG1_APP_PIN* need not be defined yet here.
+
 // --- Fan 1 (HW Channel A) ---
-#define FAN1_S1_PWM_PIN 18   // PWM_A: via U3 level shifter -> Q1 open-drain
-#define FAN1_SW_PIN     29   // POW_A: via U3 level shifter -> Q7/Q6 high-side switch
-#define FAN1_TACHO_PIN  27   // TACHO_A: isolated via U2 optocoupler (active low)
+#define FAN1_S1_PWM_PIN REG1_APP_PIN5   // PWM_A: via U3 level shifter -> Q1 open-drain
+#define FAN1_SW_PIN     REG1_APP_PIN1   // POW_A: via U3 level shifter -> Q7/Q6 high-side switch
+#define FAN1_TACHO_PIN  REG1_APP_PIN3   // TACHO_A: isolated via U2 optocoupler (active low)
 
 // --- Fan 2 (HW Channel B) ---
-#define FAN2_S1_PWM_PIN 28   // PWM_B: via U3 level shifter -> Q2 open-drain
-#define FAN2_SW_PIN     26   // POW_B: via U3 level shifter -> Q9/Q8 high-side switch
-#define FAN2_TACHO_PIN  17   // TACHO_B: isolated via U1 optocoupler (active low)
-// #define PIN_SPARE       16   // Exposed on J1 pin 10, not connected on PCB
+#define FAN2_S1_PWM_PIN REG1_APP_PIN2   // PWM_B: via U3 level shifter -> Q2 open-drain
+#define FAN2_SW_PIN     REG1_APP_PIN4   // POW_B: via U3 level shifter -> Q9/Q8 high-side switch
+#define FAN2_TACHO_PIN  REG1_APP_PIN6   // TACHO_B: isolated via U1 optocoupler (active low)
+// REG1_APP_PIN7 stays free: exposed on J1 pin 10, not connected on the PCB
 
 // --- No mirror outputs on this board ---
 // One drive output per node; it carries speed AND direction (mid position = standstill).
@@ -67,12 +76,25 @@
 
 // --- How many fans this board can actually drive ---
 // The ETS lets the user activate up to FAN_ChannelCount channels, which is a property of the
-// application, not of the board. This table is the board's answer: everything beyond it has
-// no pins and is reported as a configuration fault instead of silently doing nothing.
-// Order matches the ETS channels.
+// application, not of the board. This is the board's answer: everything beyond it has no pins
+// and is reported as a configuration fault instead of silently doing nothing.
+//
+// This stays a compile-time number because FanModule::flashSize() is derived from it and the
+// framework asks for it before setup() runs.
 #define FAN_BOARD_CHANNELS 2
-#define FAN_BOARD_PIN_TABLE                                              \
-    {                                                                    \
-        {FAN1_S1_PWM_PIN, FAN1_S2_PWM_PIN, FAN1_SW_PIN, FAN1_TACHO_PIN}, \
-        {FAN2_S1_PWM_PIN, FAN2_S2_PWM_PIN, FAN2_SW_PIN, FAN2_TACHO_PIN}, \
-    }
+
+// --- Which drive method each output uses ---
+// The module knows only IFanHardware; the board decides what is behind it. Same pattern as
+// LED_INIT() in OGM-Common: a macro that constructs the objects, expanded inside the module
+// where all headers are available — so no include is needed here.
+//
+// Order of the addHardware() calls is the order of the ETS channels.
+//
+// PwmFan is the drive method of this board: one output per node carrying speed and direction,
+// a load switch, and speed fed back through a separate opto-coupled tacho input.
+#define FAN_INIT()                                                            \
+    PwmFan::configureShared(configured ? ParamFAN_PwmFreq : 1000);            \
+    addHardware(new PwmFan(FAN1_S1_PWM_PIN, FAN1_S2_PWM_PIN,                  \
+                           FAN1_SW_PIN, FAN1_TACHO_PIN));                     \
+    addHardware(new PwmFan(FAN2_S1_PWM_PIN, FAN2_S2_PWM_PIN,                  \
+                           FAN2_SW_PIN, FAN2_TACHO_PIN));

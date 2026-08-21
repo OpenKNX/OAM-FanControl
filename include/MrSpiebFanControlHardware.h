@@ -35,8 +35,16 @@
 // Two nodes, each with a mirrored pair of outputs. Everything the ETS configures beyond this
 // has no pins and is reported as a configuration fault. Order matches the ETS channels.
 #define FAN_BOARD_CHANNELS 2
-#define FAN_BOARD_PIN_TABLE                                              \
-    {                                                                    \
-        {FAN1_S1_PWM_PIN, FAN1_S2_PWM_PIN, FAN1_SW_PIN, FAN1_TACHO_PIN}, \
-        {FAN2_S1_PWM_PIN, FAN2_S2_PWM_PIN, FAN2_SW_PIN, FAN2_TACHO_PIN}, \
-    }
+// --- Which drive method each output uses ---
+// The module knows only IFanHardware; the board decides what is behind it. Same pattern as
+// LED_INIT() in OGM-Common: a macro that constructs the objects, expanded inside the module,
+// so no include is needed here. Order of the calls is the order of the ETS channels.
+//
+// This board drives by duty cycle and has no tacho input, so both nodes report no speed
+// feedback and the blockage detection stays off.
+#define FAN_INIT()                                                            \
+    PwmFan::configureShared(configured ? ParamFAN_PwmFreq : 1000);            \
+    addHardware(new PwmFan(FAN1_S1_PWM_PIN, FAN1_S2_PWM_PIN,                  \
+                           FAN1_SW_PIN, FAN1_TACHO_PIN));                     \
+    addHardware(new PwmFan(FAN2_S1_PWM_PIN, FAN2_S2_PWM_PIN,                  \
+                           FAN2_SW_PIN, FAN2_TACHO_PIN));
